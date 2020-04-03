@@ -138,24 +138,31 @@ void WczytajWgImienia(vector<Adresy> &adresaci) {
     }
 }
 int wyznaczaIDKolejnegoUzytkownika(vector<Adresy> &adresaci,string idZalogowanegoUzytkownika) {
-    int idKolejnegoUzytkownika;
+
+    int idKolejnegoUzytkownika=0;
     string IdOstatniegoUzytkownika="";
-    int iloscOsobWTXT,ilscOsobwTXT_minus1;
+    int iloscOsobWTXT=0,ilscOsobwTXT_minus1=0;
     iloscOsobWTXT= OdczytKsiazki(adresaci,idZalogowanegoUzytkownika);
-    ilscOsobwTXT_minus1=iloscOsobWTXT-1;
-    IdOstatniegoUzytkownika=adresaci[ilscOsobwTXT_minus1].id;
-    int IdOstatniegoUzytkownika_int;
-    IdOstatniegoUzytkownika_int=atoi(IdOstatniegoUzytkownika.c_str());
-    if(adresaci.empty()) {
-        return idKolejnegoUzytkownika=iloscOsobWTXT+1;
-    } else if(ilscOsobwTXT_minus1<0) {
+
+
+    if(iloscOsobWTXT==0) {
         return 1;
-    } else if(iloscOsobWTXT<IdOstatniegoUzytkownika_int) {
-        return idKolejnegoUzytkownika=IdOstatniegoUzytkownika_int+1;
-    } else if( iloscOsobWTXT>=IdOstatniegoUzytkownika_int) {
-        return idKolejnegoUzytkownika=iloscOsobWTXT+1;
+    } else {
+        ilscOsobwTXT_minus1=iloscOsobWTXT-1;
+        IdOstatniegoUzytkownika=adresaci[ilscOsobwTXT_minus1].id;
+        int IdOstatniegoUzytkownika_int=0;
+        IdOstatniegoUzytkownika_int=atoi(IdOstatniegoUzytkownika.c_str());
+        if((adresaci.empty())&&(iloscOsobWTXT>0)) {
+            idKolejnegoUzytkownika=iloscOsobWTXT+1;
+        } else if(iloscOsobWTXT<IdOstatniegoUzytkownika_int) {
+            return idKolejnegoUzytkownika=IdOstatniegoUzytkownika_int+1;
+        } else if( iloscOsobWTXT>=IdOstatniegoUzytkownika_int) {
+            return idKolejnegoUzytkownika=iloscOsobWTXT+1;
+        }
     }
 }
+
+
 void zapisujeDoksiazkiPoEdycji(vector<Adresy> &adresaci, int ilosc_osob) {
     Adresy osoby;
     int u=0;
@@ -450,7 +457,7 @@ int main() {
                     Sleep(3000);
                     ktoremenu='1';
                 } else if(w!="") {
-                ktoremenu='2';
+                    ktoremenu='2';
                 }
             } else if(wybor=='3') {
                 exit(0);
@@ -472,8 +479,11 @@ int main() {
             vector<Adresy> adresaci;
             int ilosc_osob=OdczytKsiazki(adresaci,idZalogowanegoUzytkownika);
             if(wybor=='1') {
+
                 system("cls");
+
                 int id=wyznaczaIDKolejnegoUzytkownika(adresaci,idZalogowanegoUzytkownika);
+
                 DodajOsoby(id,idZalogowanegoUzytkownika);
             } else if(wybor=='2')  {
                 system("cls");
@@ -541,12 +551,10 @@ int main() {
                     zapisujeDoksiazkiPoUsunieciu(adresaci,id_usun,ilosc_osob,idZalogowanegoUzytkownika);
                     usuwaUzytkownika(adresaci,id_usun);
                 }
-            }
-            else if(wybor=='7') {
+            } else if(wybor=='7') {
                 system("cls");
                 zmianahasla(uzytkownik,idZalogowanegoUzytkownika);
-            }
-            else if(wybor=='9') {
+            } else if(wybor=='9') {
                 ktoremenu='1';
             }
         }
