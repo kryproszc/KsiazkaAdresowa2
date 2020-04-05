@@ -8,8 +8,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-
-#include  <sstream>
+#include <sstream>
 
 using namespace std;
 struct Adresy {
@@ -28,7 +27,9 @@ string konwersja_String(int liczba) {
     return str;
 }
 int  OdczytKsiazki(vector <Adresy> &adresaci,string dana) {
-    int iloscOsobWplku=0;
+    int id_Uzytkownika_int=0;
+    int id_zalogowanego_Uzytkownika=1;
+    string id_Uzytkownika="";
     Adresy osoby;
     fstream plik;
     plik.open("osoby.txt",ios::in);
@@ -43,10 +44,15 @@ int  OdczytKsiazki(vector <Adresy> &adresaci,string dana) {
         if(osoby.idZalogowanegoUzytkownika==dana) {
             adresaci.push_back(osoby);
         }
-        iloscOsobWplku++;
+    if(osoby.id!="")
+    {
+       id_Uzytkownika=osoby.id;
+       id_Uzytkownika_int=atoi(id_Uzytkownika.c_str());
+        id_zalogowanego_Uzytkownika=id_Uzytkownika_int+1;
+    }
     } while(getline(plik,osoby.id));
     plik.close();
-    return iloscOsobWplku-1;
+    return id_zalogowanego_Uzytkownika;
 }
 int DodajOsoby( int id,string idZalogowanegoUzytkownika) {
     Adresy osoby;
@@ -137,33 +143,7 @@ void WczytajWgImienia(vector<Adresy> &adresaci) {
         cout<< "Uzytkownik o imieniu: "<<imie<< " nie istnieje w ksiazce adresowej."<<endl;
     }
 }
-int wyznaczaIDKolejnegoUzytkownika(vector<Adresy> &adresaci,string idZalogowanegoUzytkownika) {
-
-    int idKolejnegoUzytkownika=0;
-    string IdOstatniegoUzytkownika="";
-    int iloscOsobWTXT=0,ilscOsobwTXT_minus1=0;
-    iloscOsobWTXT= OdczytKsiazki(adresaci,idZalogowanegoUzytkownika);
-
-
-    if(iloscOsobWTXT==0) {
-        return 1;
-    } else {
-        ilscOsobwTXT_minus1=iloscOsobWTXT-1;
-        IdOstatniegoUzytkownika=adresaci[ilscOsobwTXT_minus1].id;
-        int IdOstatniegoUzytkownika_int=0;
-        IdOstatniegoUzytkownika_int=atoi(IdOstatniegoUzytkownika.c_str());
-        if((adresaci.empty())&&(iloscOsobWTXT>0)) {
-            idKolejnegoUzytkownika=iloscOsobWTXT+1;
-        } else if(iloscOsobWTXT<IdOstatniegoUzytkownika_int) {
-            return idKolejnegoUzytkownika=IdOstatniegoUzytkownika_int+1;
-        } else if( iloscOsobWTXT>=IdOstatniegoUzytkownika_int) {
-            return idKolejnegoUzytkownika=iloscOsobWTXT+1;
-        }
-    }
-}
-
-
-void zapisujeDoksiazkiPoEdycji(vector<Adresy> &adresaci, int ilosc_osob) {
+void zapisujeDoksiazkiPoEdycji(vector<Adresy> &adresaci) {
     Adresy osoby;
     int u=0;
     int j=0;
@@ -194,67 +174,67 @@ void zapisujeDoksiazkiPoEdycji(vector<Adresy> &adresaci, int ilosc_osob) {
     plik_tymczasowy.close();
     remove( "osoby.txt" );
     rename("osoby.tymczasowy.txt","osoby.txt");
-    cout<< "Dane zostaly edytowane poprawnie"<<" "<<j;
+    cout<< "Dane zostaly edytowane poprawnie";
 }
-vector<Adresy> zmieniaImie(vector<Adresy> &adresaci,string idUzytkownika,int ilosc_osob) {
+vector<Adresy> zmieniaImie(vector<Adresy> &adresaci,string idUzytkownika) {
     string noweImie;
     for(int i=0; i<adresaci.size(); i++) {
         if(adresaci[i].id==idUzytkownika) {
-            cout<< " Podaj nowe imie: ";
+            cout<< "Podaj nowe imie: ";
             cin>>noweImie;
             adresaci[i].imie=noweImie;
         }
     }
-    zapisujeDoksiazkiPoEdycji(adresaci,ilosc_osob);
+    zapisujeDoksiazkiPoEdycji(adresaci);
     return adresaci;
 }
-vector<Adresy> zmieniaNazwisko(vector<Adresy> &adresaci,string idUzytkownika,int ilosc_osob) {
+vector<Adresy> zmieniaNazwisko(vector<Adresy> &adresaci,string idUzytkownika) {
     string noweNazwisko;
     for(int i=0; i<adresaci.size(); i++) {
         if(adresaci[i].id==idUzytkownika) {
-            cout<< " Podaj nowe nazwisko: ";
+            cout<< "Podaj nowe nazwisko: ";
             cin>>noweNazwisko;
             adresaci[i].nazwisko=noweNazwisko;
         }
     }
-    zapisujeDoksiazkiPoEdycji(adresaci,ilosc_osob);
+    zapisujeDoksiazkiPoEdycji(adresaci);
     return adresaci;
 }
-vector<Adresy> zmieniaNumerTel(vector<Adresy> &adresaci,string idUzytkownika,int ilosc_osob) {
+vector<Adresy> zmieniaNumerTel(vector<Adresy> &adresaci,string idUzytkownika) {
     string noweNr_tel;
     for(int i=0; i<adresaci.size(); i++) {
         if(adresaci[i].id==idUzytkownika) {
-            cout<< " Podaj nowe numer telefonu: ";
+            cout<< "Podaj nowe numer telefonu: ";
             cin>>noweNr_tel;
             adresaci[i].nr_tel=noweNr_tel;
         }
     }
-    zapisujeDoksiazkiPoEdycji(adresaci,ilosc_osob);
+    zapisujeDoksiazkiPoEdycji(adresaci);
 
     return adresaci;
 }
-vector<Adresy> zmieniaemail(vector<Adresy> adresaci,string idUzytkownika,int ilosc_osob) {
+vector<Adresy> zmieniaemail(vector<Adresy> adresaci,string idUzytkownika) {
     string noweemail;
     for(int i=0; i<adresaci.size(); i++) {
         if(adresaci[i].id==idUzytkownika) {
-            cout<< " Podaj nowe email: ";
+            cout<< "Podaj nowe email: ";
             cin>>noweemail;
             adresaci[i].email=noweemail;
         }
     }
-    zapisujeDoksiazkiPoEdycji(adresaci,ilosc_osob);
+    zapisujeDoksiazkiPoEdycji(adresaci);
     return adresaci;
 }
-vector<Adresy> zmieniaAdres(vector<Adresy> adresaci,string idUzytkownika,int ilosc_osob) {
+vector<Adresy> zmieniaAdres(vector<Adresy> adresaci,string idUzytkownika) {
     string noweAdres;
     for(int i=0; i<adresaci.size(); i++) {
         if(adresaci[i].id==idUzytkownika) {
-            cout<< " Podaj nowe adres: ";
+            cout<< "Podaj nowe adres: ";
             cin>>noweAdres;
             adresaci[i].adres=noweAdres;
         }
     }
-    zapisujeDoksiazkiPoEdycji(adresaci,ilosc_osob);
+    zapisujeDoksiazkiPoEdycji(adresaci);
     return adresaci;
 }
 vector <Adresy> usuwaUzytkownika( vector<Adresy> &adresaci,string idUsuwanegoUzytkownika) {
@@ -266,13 +246,13 @@ vector <Adresy> usuwaUzytkownika( vector<Adresy> &adresaci,string idUsuwanegoUzy
     }
     return adresaci;
 }
-void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikIstnieje(vector<Adresy> &dosusuniecia,int ilosc_osob,string idUsuwanegoUzytkownika) {
+void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikIstnieje(vector<Adresy> &dosusuniecia,string idUsuwanegoUzytkownika) {
     fstream plik_tymczasowy;
     plik_tymczasowy.open("osoby.tymczasowy.txt",ios::out|ios::app);
     if (plik_tymczasowy.good() == false) {
         plik_tymczasowy.open("osoby.tymczasowy.txt",std::ios::out);
     }
-    for(int j=0; j<ilosc_osob; j++) {
+    for(int j=0; j<dosusuniecia.size()-1; j++) {
         if(dosusuniecia[j].id!=idUsuwanegoUzytkownika) {
             string id,imie,nazwisko,nr_tel,email,adres,idZalogowanegoUzytkownika;
             id=dosusuniecia[j].id;
@@ -290,13 +270,13 @@ void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikIstnieje(vector<Adresy> &dosusun
     rename("osoby.tymczasowy.txt","osoby.txt");
     cout<< "Dane zostaly edytowane poprawnie";
 }
-void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikNieIstnieje(vector<Adresy> &dosusuniecia,int ilosc_osob) {
+void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikNieIstnieje(vector<Adresy> &dosusuniecia) {
     fstream plik_tymczasowy;
     plik_tymczasowy.open("osoby.tymczasowy.txt",ios::out|ios::app);
     if (plik_tymczasowy.good() == false) {
         plik_tymczasowy.open("osoby.tymczasowy.txt",std::ios::out);
     }
-    for(int j=0; j<ilosc_osob; j++)  {
+    for(int j=0; j<dosusuniecia.size()-1; j++)  {
         string id,imie,nazwisko,nr_tel,email,adres,idZalogowanegoUzytkownika;
         id=dosusuniecia[j].id;
         idZalogowanegoUzytkownika=dosusuniecia[j].idZalogowanegoUzytkownika;
@@ -312,7 +292,7 @@ void zapisujeDoksiazkiPoUsunieciuJesliUzytkownikNieIstnieje(vector<Adresy> &dosu
     rename("osoby.tymczasowy.txt","osoby.txt");
     cout<<"Nie ma takiego uytkownika";
 }
-void zapisujeDoksiazkiPoUsunieciu(vector<Adresy> &adresaci,string idUsuwanegoUzytkownika,int ilosc_osob,string idZalogowanegoUzytkownika) {
+void zapisujeDoksiazkiPoUsunieciu(vector<Adresy> &adresaci,string idUsuwanegoUzytkownika,string idZalogowanegoUzytkownika) {
     vector<Adresy> dosusuniecia;
     Adresy osoby;
     int u=0;
@@ -331,17 +311,17 @@ void zapisujeDoksiazkiPoUsunieciu(vector<Adresy> &adresaci,string idUsuwanegoUzy
     } while(getline(plik,osoby.id));
     plik.close();
     int czypodanyUzytkownikIstniejeWbazie=0;
-    for(int l=0; l<ilosc_osob; l++) {
+    for(int l=0; l<adresaci.size(); l++) {
         if(adresaci[l].id==idUsuwanegoUzytkownika) {
             czypodanyUzytkownikIstniejeWbazie++;
             break;
         }
     }
     if(czypodanyUzytkownikIstniejeWbazie==1)  {
-        zapisujeDoksiazkiPoUsunieciuJesliUzytkownikIstnieje(dosusuniecia,ilosc_osob,idUsuwanegoUzytkownika);
+        zapisujeDoksiazkiPoUsunieciuJesliUzytkownikIstnieje(dosusuniecia,idUsuwanegoUzytkownika);
     }
     if(czypodanyUzytkownikIstniejeWbazie==0) {
-        zapisujeDoksiazkiPoUsunieciuJesliUzytkownikNieIstnieje(dosusuniecia,ilosc_osob);
+        zapisujeDoksiazkiPoUsunieciuJesliUzytkownikNieIstnieje(dosusuniecia);
     }
 }
 int  czytaBazeUzytkownikow(vector <Uzytkownicy> &uzytkownik) {
@@ -362,17 +342,17 @@ int  czytaBazeUzytkownikow(vector <Uzytkownicy> &uzytkownik) {
 void zapiszUzytkownikow(vector<Uzytkownicy> &adresaci) {
     fstream edycja;
     edycja.open("Uzytkownicy.txt",ios::out|ios::trunc);
-    for(int i=0; i<adresaci.size(); i++) {
+    for(int i=0; i<adresaci.size()-1; i++) {
         edycja<<adresaci[i].id<<"|"<<adresaci[i].login<<"|"<<adresaci[i].haslo<<"|"<<endl;
     }
     edycja.close();
 }
-int rejestracja( vector <Uzytkownicy> &uzytkownik,int iloscUzytkownikow) {
+void rejestracja( vector <Uzytkownicy> &uzytkownik) {
     string nazwa, haslo;
     cout<< "Podaj nazwe uzytkwnika: ";
     cin>>nazwa;
     int i=0;
-    while( i<iloscUzytkownikow) {
+    while( i<uzytkownik.size()) {
         if(uzytkownik[i].login==nazwa) {
             cout<<"Uzytkowniek o nazwie: "<<uzytkownik[i].login<<" juZ istnieje. Wpisz inna nazwe uzytkwnika: ";
             cin>>nazwa;
@@ -383,17 +363,20 @@ int rejestracja( vector <Uzytkownicy> &uzytkownik,int iloscUzytkownikow) {
     }
     cout<< "Podaj haslo: ";
     cin>>haslo;
-    int id_int=iloscUzytkownikow+1;
+    int iloscUzytkownikow=uzytkownik.size();
+    int id_int=iloscUzytkownikow;
     string id_string=konwersja_String(id_int);
-    uzytkownik[iloscUzytkownikow].login=nazwa;
-    uzytkownik[iloscUzytkownikow].haslo=haslo;
-    uzytkownik[iloscUzytkownikow].id=id_string;
-    zapiszUzytkownikow(uzytkownik);
+    fstream plik;
+    plik.open("Uzytkownicy.txt",ios::out|ios::app);
+    if (plik.good() == false) {
+        plik.open("Uzytkownicy.txt",std::ios::out);
+    }
+    plik<<id_string<<"|"<<nazwa<<"|"<<haslo<<"|"<<endl;
+    plik.close();
     cout<< "Konto zalozone!"<<endl;
     Sleep(1000);
-    return iloscUzytkownikow+1;
 }
-string logowanie(vector <Uzytkownicy> &uzytkownik, int iloscUzytkownikow) {
+string logowanie(vector <Uzytkownicy> &uzytkownik) {
     string nazwa;
     string haslo;
     vector<Adresy> adresaci;
@@ -401,7 +384,8 @@ string logowanie(vector <Uzytkownicy> &uzytkownik, int iloscUzytkownikow) {
     int d=0;
     cout<< "Podaj nazwe uzytkownika: ";
     cin>>nazwa;
-    while(i<iloscUzytkownikow) {
+    while(i<uzytkownik.size()) {
+            d++;
         if(uzytkownik[i].login == nazwa) {
             for(int q=0; q<3; q++) {
                 cout<< "Podaj haslo. Pozostalo "<<3-q<< " prob"<<": ";
@@ -410,9 +394,13 @@ string logowanie(vector <Uzytkownicy> &uzytkownik, int iloscUzytkownikow) {
                     return uzytkownik[i].id;
                 }
             }
-            return "";
+             return "";
         }
         i++;
+    }
+    if(d==(uzytkownik.size()))
+    {
+        return "";
     }
 }
 void  zmianahasla(vector <Uzytkownicy> &uzytkownik,string idZalogowanegoUzytkownika) {
@@ -431,7 +419,6 @@ void  zmianahasla(vector <Uzytkownicy> &uzytkownik,string idZalogowanegoUzytkown
 int main() {
     char wybor;
     char ktoremenu='1';
-    string w="";
     string idZalogowanegoUzytkownika="";
     while(true) {
         vector <Uzytkownicy> uzytkownik;
@@ -448,16 +435,23 @@ int main() {
             cin>>wybor;
             if(wybor=='1') {
                 system("cls");
-                rejestracja(uzytkownik,ilosc);
+                rejestracja(uzytkownik);
             } else if(wybor=='2') {
                 system("cls");
-                w=logowanie(uzytkownik, ilosc);
-                if(w=="") {
+                if(uzytkownik.size()==1)
+                {
+                    cout <<"Brak uzytkownikow";
+                    Sleep(2000);
+                }
+                else{
+                idZalogowanegoUzytkownika=logowanie(uzytkownik);
+                if(idZalogowanegoUzytkownika=="") {
                     cout<< "Login lub haslo niepoprawne. Sprobuj raz jeszcze.";
                     Sleep(3000);
                     ktoremenu='1';
-                } else if(w!="") {
+                } else if(idZalogowanegoUzytkownika!="") {
                     ktoremenu='2';
+                }
                 }
             } else if(wybor=='3') {
                 exit(0);
@@ -475,16 +469,12 @@ int main() {
             cout<< "7.Zmien haslo"<<endl;
             cout<< "9.Wyloguj sie"<<endl;
             cin>>wybor;
-            idZalogowanegoUzytkownika=w;
+            ;
             vector<Adresy> adresaci;
-            int ilosc_osob=OdczytKsiazki(adresaci,idZalogowanegoUzytkownika);
+            int id_Uzytkownika=OdczytKsiazki(adresaci,idZalogowanegoUzytkownika);
             if(wybor=='1') {
-
                 system("cls");
-
-                int id=wyznaczaIDKolejnegoUzytkownika(adresaci,idZalogowanegoUzytkownika);
-
-                DodajOsoby(id,idZalogowanegoUzytkownika);
+                DodajOsoby(id_Uzytkownika,idZalogowanegoUzytkownika);
             } else if(wybor=='2')  {
                 system("cls");
                 WczytajKsiazke(adresaci);
@@ -525,18 +515,19 @@ int main() {
                     cout<< "4-Adres email"<<endl;
                     cout<< "5-Adres"<<endl;
                     cin>>danaDoZmiany;
+                    system("cls");
                     if(danaDoZmiany=='1') {
-                        zmieniaImie(adresaci,idUzytkownika,ilosc_osob);
+                        zmieniaImie(adresaci,idUzytkownika);
                     } else if(danaDoZmiany=='2') {
-                        zmieniaNazwisko(adresaci,idUzytkownika,ilosc_osob);
+                        zmieniaNazwisko(adresaci,idUzytkownika);
                     } else if(danaDoZmiany=='3') {
-                        zmieniaNumerTel(adresaci,idUzytkownika,ilosc_osob);
+                        zmieniaNumerTel(adresaci,idUzytkownika);
                     } else if(danaDoZmiany=='4') {
-                        zmieniaemail(adresaci,idUzytkownika,ilosc_osob);
+                        zmieniaemail(adresaci,idUzytkownika);
                     } else if(danaDoZmiany=='5') {
-                        zmieniaAdres(adresaci,idUzytkownika,ilosc_osob);
+                        zmieniaAdres(adresaci,idUzytkownika);
                     }
-                } else {
+                 }else {
                     cout<< "Nie ma takiego uzytkownika w ksiazce";
                 }
             } else if(wybor=='6') {
@@ -548,7 +539,7 @@ int main() {
                 char decyzjaCzyusunacUzytkownika;
                 cin>>decyzjaCzyusunacUzytkownika;
                 if(decyzjaCzyusunacUzytkownika=='t') {
-                    zapisujeDoksiazkiPoUsunieciu(adresaci,id_usun,ilosc_osob,idZalogowanegoUzytkownika);
+                    zapisujeDoksiazkiPoUsunieciu(adresaci,id_usun,idZalogowanegoUzytkownika);
                     usuwaUzytkownika(adresaci,id_usun);
                 }
             } else if(wybor=='7') {
