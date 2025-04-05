@@ -1,2 +1,13 @@
-pip install numpy --proxy="http://192.168.105.6:3128"
-pip download shinyswatch pandas numpy matplotlib --proxy="http://192.168.105.6:3128" -d "C:\Users\szczkr\Desktop\paczki"
+from shiny import App, ui
+
+# UI - to, co widać w przeglądarce
+app_ui = ui.page_fluid(
+    "Hello, world!"  # Prosty tekst
+)
+
+# Serwer - logika aplikacji (tu na razie pusto)
+def server(input, output, session):
+    pass
+
+# Tworzymy aplikację
+app = App(app_ui, server)
