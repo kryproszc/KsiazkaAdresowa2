@@ -6,11 +6,11 @@ from shiny import App, ui, render, reactive
 
 app_ui = ui.page_fluid(
     ui.navset_tab(
-        ui.nav("🏠 Start",
+        ui.nav_panel("🏠 Start",
             ui.h2("Witaj w aplikacji testowej 🚀"),
             ui.p("Przejdź do zakładki 'Symulacja', aby wygenerować dane.")
         ),
-        ui.nav("🎲 Symulacja",
+        ui.nav_panel("🎲 Symulacja",
             ui.h3("Symulacja danych"),
             ui.input_numeric("sample_size", "Rozmiar próbki", value=1000, min=100, max=10000),
             ui.input_numeric("mean", "Średnia", value=0),
@@ -18,12 +18,12 @@ app_ui = ui.page_fluid(
             ui.input_action_button("generate", "Generuj dane"),
             ui.output_text("sim_status")
         ),
-        ui.nav("📊 Wyniki",
+        ui.nav_panel("📊 Wyniki",
             ui.h3("Wyniki symulacji"),
             ui.output_text("summary_text"),
             ui.output_plot("histogram_plot")
         ),
-        ui.nav("ℹ️ Informacje",
+        ui.nav_panel("ℹ️ Informacje",
             ui.h3("Informacje o aplikacji"),
             ui.p("Ta aplikacja pozwala na testowanie wielozakładkowej struktury z przepływem danych pomiędzy zakładkami."),
             ui.p("Idealna do testów wieloużytkownikowych.")
@@ -45,6 +45,7 @@ def server(input, output, session):
         mean = input.mean()
         std_dev = input.std_dev()
 
+        # Generowanie danych
         data = np.random.normal(loc=mean, scale=std_dev, size=size)
         data_store.set(data)
 
@@ -55,7 +56,7 @@ def server(input, output, session):
         if data.size == 0:
             return "Brak danych. Wygeneruj próbkę!"
         else:
-            return "Dane wygenerowane! Przejdź do zakładki 'Wyniki'."
+            return "✅ Dane wygenerowane! Przejdź do zakładki 'Wyniki'."
 
     @output
     @render.text
