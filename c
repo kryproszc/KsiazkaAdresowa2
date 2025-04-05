@@ -16,3 +16,7 @@ def server(input, output, session):
 
 # Utworzenie aplikacji
 app = App(app_ui, server)
+
+
+shiny run --host 0.0.0.0 --port 8000
+http://172.16.16.216:8000
