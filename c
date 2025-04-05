@@ -1,1 +1,1 @@
-pip download shinyswatch pandas numpy matplotlib -d "C:\Users\szczkr\Desktop\paczki"
+pip install --no-index --find-links="C:\Users\szczkr\Desktop\paczki" shinyswatch pandas numpy matplotlib
