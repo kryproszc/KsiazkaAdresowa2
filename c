@@ -49,3 +49,9 @@ def server(input, output, session):
             return "No logs yet."
 
 app = App(app_ui, server)
+
+
+
+shiny run --host 0.0.0.0 --port 8000 app.py
+http://172.25.210.87:8000
+
