@@ -1,57 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
 from shiny import App, ui, render, reactive
-import datetime
-
-logfile = "log.txt"
-
-# Funkcja do zapisu do logu
-def log_interaction(name, number):
-    with open(logfile, "a") as f:
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"{now} - {name} selected number {number}\n")
 
 app_ui = ui.page_fluid(
-    ui.h2("Interactive Test App 🧩"),
-    ui.input_text("username", "Enter your name:", placeholder="Your name"),
-    ui.input_slider("num", "Choose a number:", min=1, max=100, value=50),
-    ui.input_action_button("submit", "Submit"),
+    ui.h2("🎲 Random Variable Generator and Histogram"),
+    ui.input_numeric("sample_size", "Sample size", value=1000, min=10, max=10000),
+    ui.input_numeric("mean", "Mean", value=0),
+    ui.input_numeric("std_dev", "Standard deviation", value=1),
+    ui.input_action_button("generate", "Generate Sample"),
     ui.hr(),
-    ui.output_text("result"),
-    ui.hr(),
-    ui.output_text_verbatim("log_display")
+    ui.output_plot("histogram_plot"),
+    ui.output_text("summary_text")
 )
 
 def server(input, output, session):
 
-    # Reaktywna funkcja dla przycisku
-    @reactive.Effect
-    @reactive.event(input.submit)
-    def _():
-        name = input.username() or "Anonymous"
-        number = input.num()
-        log_interaction(name, number)
+    @reactive.Calc
+    @reactive.event(input.generate)
+    def generate_data():
+        size = input.sample_size()
+        mean = input.mean()
+        std_dev = input.std_dev()
 
-    # Wynik dla użytkownika na żywo
+        # Generujemy dane z rozkładu normalnego
+        data = np.random.normal(loc=mean, scale=std_dev, size=size)
+        return data
+
+    @output
+    @render.plot
+    def histogram_plot():
+        data = generate_data()
+        fig, ax = plt.subplots()
+        ax.hist(data, bins=30, color='skyblue', edgecolor='black')
+        ax.set_title("Histogram of Generated Data")
+        ax.set_xlabel("Value")
+        ax.set_ylabel("Frequency")
+        return fig
+
     @output
     @render.text
-    def result():
-        name = input.username() or "Anonymous"
-        number = input.num()
-        return f"{name}, you selected number {number}. Its double is {number * 2}!"
-
-    # Wyświetlenie logów na stronie (na żywo)
-    @output
-    @render.text
-    def log_display():
-        try:
-            with open(logfile, "r") as f:
-                return f.read()
-        except FileNotFoundError:
-            return "No logs yet."
+    def summary_text():
+        data = generate_data()
+        return (
+            f"Sample generated!\n"
+            f"Size: {len(data)}\n"
+            f"Mean: {np.mean(data):.2f}\n"
+            f"Standard deviation: {np.std(data):.2f}"
+        )
 
 app = App(app_ui, server)
-
-
-
-shiny run --host 0.0.0.0 --port 8000 app.py
-http://172.25.210.87:8000
-
