@@ -393,37 +393,37 @@ def server(input, output, session):
     @reactive.Effect
     @reactive.event(input.check_button_paid)
     def _():
-        current_triangle.set("triangle_paid")
+        user_data.current_triangle.set("triangle_paid")
         check_data("Dane Paid")
 
     @reactive.Effect
     @reactive.event(input.check_button_inc)
     def _():
-        current_triangle.set("triangle_incurred")
+        user_data.current_triangle.set("triangle_incurred")
         check_data("Dane Incurred")
 
     @reactive.Effect
     @reactive.event(input.check_button_eksp)
     def _():
-        current_triangle.set("triangle_exposure")
+        user_data.current_triangle.set("triangle_exposure")
         check_data("Dane Ekspozycja")
 
     @reactive.Effect
     @reactive.event(input.download_button_paid)
     def _():
-        current_triangle.set("triangle_paid")
+        user_data.current_triangle.set("triangle_paid")
         show_download_modal()
 
     @reactive.Effect
     @reactive.event(input.download_button_inc)
     def _():
-        current_triangle.set("triangle_incurred")
+        user_data.current_triangle.set("triangle_incurred")
         show_download_modal()
 
     @reactive.Effect
     @reactive.event(input.download_button_eksp)
     def _():
-        current_triangle.set("triangle_exposure")
+        user_data.current_triangle.set("triangle_exposure")
         show_download_modal()
 
     # Wyświetlanie w zakładce "Metody deterministyczne"
@@ -437,7 +437,7 @@ def server(input, output, session):
             return pd.DataFrame({"Info": ["Brak danych"]})
 
     @output
-    @render.download(filename=lambda: f"{current_triangle.get()}.{'csv' if input.file_format() == 'csv' else 'xlsx'}")
+    @render.download(filename=lambda: f"{user_data.current_triangle.get()}.{'csv' if input.file_format() == 'csv' else 'xlsx'}")
     def download_modal_data():
         data = get_current_data()
 
@@ -481,7 +481,7 @@ def server(input, output, session):
         lista_expo_list = []
 
         # Ekspozycja — zbieramy pierwszy słupek z każdego DataFrame w liście
-        lista_expo = reactive_data_exposure_list.get()
+        lista_expo = user_data.reactive_data_exposure_list.get()
         if lista_expo:
             lista_expo_list = [df.iloc[:, 0].tolist() for df in lista_expo]
 
