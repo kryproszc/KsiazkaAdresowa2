@@ -34,6 +34,7 @@ class UserSessionData:
         self.reactive_data_paid_list = reactive.Value([])
         self.reactive_data_incurred_list = reactive.Value([])
         self.reactive_data_exposure_list = reactive.Value([])
+        self.current_triangle = reactive.Value("triangle")  # domyślnie
 
 def load_excel_data(folder_path, file_name, sheet_name, start_row, start_col, end_row, end_col):
     # Zmiana ukośników z \ na / w ścieżce do folderu
@@ -171,9 +172,9 @@ def server(input, output, session):
                 data.iloc[:, 1:] = data.iloc[:, 1:].cumsum(axis=1)
 
            # data = yh.change_value_less_diagonal(data, np.nan)
-            lista = reactive_data_paid_list.get()
+            lista = user_data.reactive_data_paid_list.get()
             lista.append(data)
-            reactive_data_paid_list.set(lista)
+            user_data.reactive_data_paid_list.set(lista)
             show_info_modal("Dane Paid zostały wczytane.")
         except Exception as e:
             show_info_modal(f"Wystąpił błąd: {e}", error=True)
@@ -365,14 +366,14 @@ def server(input, output, session):
         return HTML(html)
 
     def get_current_data():
-        if current_triangle.get() == "triangle_paid":
-            lista = reactive_data_paid_list.get()
+        if user_data.current_triangle.get() == "triangle_paid":
+            lista = user_data.reactive_data_paid_list.get()
             return lista[-1] if lista else None
-        elif current_triangle.get() == "triangle_incurred":
-            lista = reactive_data_incurred_list.get()
+        elif user_data.current_triangle.get() == "triangle_incurred":
+            lista = user_data.reactive_data_incurred_list.get()
             return lista[-1] if lista else None
-        elif current_triangle.get() == "triangle_exposure":
-            lista = reactive_data_exposure_list.get()
+        elif user_data.current_triangle.get() == "triangle_exposure":
+            lista = user_data.reactive_data_exposure_list.get()
             return lista[-1] if lista else None
         else:
             return None
@@ -474,8 +475,9 @@ def server(input, output, session):
         )
     def every_triangle():
         # Listy już przechowują wszystkie trójkąty
-        lista_trojkatow_paid = reactive_data_paid_list.get()
-        lista_trojkatow_incurred = reactive_data_incurred_list.get()
+        lista_trojkatow_paid = user_data.reactive_data_paid_list.get()
+        lista_trojkatow_incurred = user_data.reactive_data_incurred_list.get()
+
         lista_expo_list = []
 
         # Ekspozycja — zbieramy pierwszy słupek z każdego DataFrame w liście
