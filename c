@@ -214,13 +214,11 @@ def server(input, output, session):
 
     # --- EXPOSURE ---
     @reactive.Effect
-    @reactive.event(input.load_button_eksp):
-
-    lista = user_data.reactive_data_exposure_list.get()
-    lista.append(data)
-    user_data.reactive_data_exposure_list.set(lista)
-
+    @reactive.event(input.load_button_eksp)
     def load_data_exposure():
+        lista = user_data.reactive_data_exposure_list.get()
+        lista.append(df)
+        user_data.reactive_data_exposure_list.set(lista)
         try:
             folder_path = input.folder_path_eksp().replace("\\", "/")
             file_name = input.file_name_eksp()
@@ -495,4 +493,3 @@ def server(input, output, session):
 
 app = App(app_ui, server)
 run_app(app)
-
