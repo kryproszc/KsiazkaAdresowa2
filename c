@@ -168,9 +168,11 @@ def server(input, output, session):
     def validate_triangle(dataframe):
         errors = set()
         rows, cols = dataframe.shape
+
+        # Zakładamy, że pierwszy wiersz i pierwsza kolumna to nagłówki
         for col_idx in range(1, cols):
             max_row = rows - (col_idx - 1)
-            for row_idx in range(rows):
+            for row_idx in range(1, rows):
                 value = dataframe.iloc[row_idx, col_idx]
                 if row_idx < max_row and (pd.isna(value) or not isinstance(value, numbers.Number)):
                     errors.add((row_idx, col_idx))
@@ -218,7 +220,10 @@ def server(input, output, session):
     def show_modal(title):
         ui.modal_show(
             ui.modal(
-                ui.output_ui("modal_table"),
+                ui.tags.div(
+                    {"style": "overflow-x: auto; overflow-y: auto; max-height: 80vh;"},
+                    ui.output_ui("modal_table")
+                ),
                 title=title,
                 easy_close=True,
                 footer=None,
