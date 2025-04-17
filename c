@@ -568,7 +568,7 @@ def server(input, output, session):
                 2: [8269, 4285, 8992, 11555, 9565, 6445, 4020, 6947, 5395, None],
                 3: [10907, 5396, 13873, 15766, 15836, 11702, 10946, 13112, None, None],
                 4: [11805, 10666, 16141, 21266, 22169, 12935, 12314, None, None, None],
-                5: [13539, 13782, 18735, 23425, 25955, 15852, None, None, None, None],
+                5: [135390000, 137820000, 18735, 23425, 25955, 15852, None, None, None, None],
                 6: [16181, 15599, 22214, 26083, 26180, None, None, None, None, None],
                 7: [18009, 15496, 22863, 27067, None, None, None, None, None, None],
                 8: [18608, 16169, 23466, None, None, None, None, None, None, None],
@@ -677,10 +677,12 @@ def server(input, output, session):
 
             if triangle_type == "triangle_paid":
                 user_data.reactive_data_paid_list.set([data])
+                user_data.dev_all_initial.set(None)  # <--- TO DODAJ
             elif triangle_type == "triangle_incurred":
                 user_data.reactive_data_incurred_list.set([data])
             elif triangle_type == "triangle_exposure":
                 user_data.reactive_data_exposure_list.set([data])
+
 
             hide_spinner()
             show_info_modal("Dane zostały wczytane.")
