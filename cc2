@@ -1,12 +1,8 @@
-if cumulative_option == "Inkrementalne":
-    data.iloc[:, 1:] = data.iloc[:, 1:].cumsum(axis=1)
-
-# 🔍 Sprawdzenie liczb
-non_numeric_found = data.iloc[:, 1:].applymap(
-    lambda x: not (pd.isna(x) or isinstance(x, (int, float, np.integer, np.floating)))
-).any().any()
-
-if non_numeric_found:
+try:
+    ratio_df = calculate_ratios_vectorized(data)
+    user_data.ratio_df_p.set(ratio_df)
+    user_data.binary_df_p.set(create_binary_df(ratio_df))
+except Exception:
     await hide_spinner()
-    show_info_modal("❌ Została wczytana wartość nieliczbowa w danych (poza kolumną AY).", error=True)
+    show_info_modal("❌ Wystąpił błąd podczas przetwarzania danych – nie można wyliczyć współczynników.", error=True)
     return
