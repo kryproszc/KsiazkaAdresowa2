@@ -1,18 +1,40 @@
-try:
-    ratio_df = calculate_ratios_vectorized(df)
-    user_data.ratio_df_p.set(ratio_df)
-    user_data.binary_df_p.set(create_binary_df(ratio_df))
-except ValueError as e:
-    user_data.modal_html.set(HTML(f"<b>Błąd (Paid):</b> {str(e)}"))
-    show_info_modal(str(e), error=True)
-    return
+   @output
+    @render.ui
+    def modal_table():
+        return user_data.modal_html.get()
 
+    async def load_data(
+            file_input, sheet_select,
+            start_row, start_col, end_row, end_col,
+            triangle_type, cumulative_option=None
+    ):
+        try:
+            file_info = file_input()
+            if not file_info:
+                raise ValueError("Nie wybrano pliku.")
+            file_path = file_info[0]["datapath"]
+            sheet_name = sheet_select()
+            if not sheet_name:
+                raise ValueError("Nie wybrano arkusza.")
 
-try:
-    ratio_df_i = calculate_ratios_vectorized(df)
-    user_data.ratio_df_i.set(ratio_df_i)
-    user_data.binary_df_i.set(create_binary_df(ratio_df_i))
-except ValueError as e:
-    user_data.modal_html.set(HTML(f"<b>Błąd (Incurred):</b> {str(e)}"))
-    show_info_modal(str(e), error=True)
-    return
+            data = await to_thread(
+                load_excel_data,
+                file_path, sheet_name, start_row, start_col, end_row, end_col
+            )
+
+            if cumulative_option == "Inkrementalne":
+                data.iloc[:, 1:] = data.iloc[:, 1:].cumsum(axis=1)
+
+            if triangle_type == "triangle_paid":
+                user_data.reactive_data_paid_list.set([data])
+                user_data.dev_all_initial.set(None)  # <--- TO DODAJ
+            elif triangle_type == "triangle_incurred":
+                user_data.reactive_data_incurred_list.set([data])
+            elif triangle_type == "triangle_exposure":
+                user_data.reactive_data_exposure_list.set([data])
+
+            hide_spinner()
+            show_info_modal("Dane zostały wczytane.")
+        except Exception as e:
+            hide_spinner()
+            show_info_modal(f"Błąd: {e}", error=True)
