@@ -1,40 +1,12 @@
-   @output
-    @render.ui
-    def modal_table():
-        return user_data.modal_html.get()
+if cumulative_option == "Inkrementalne":
+    data.iloc[:, 1:] = data.iloc[:, 1:].cumsum(axis=1)
 
-    async def load_data(
-            file_input, sheet_select,
-            start_row, start_col, end_row, end_col,
-            triangle_type, cumulative_option=None
-    ):
-        try:
-            file_info = file_input()
-            if not file_info:
-                raise ValueError("Nie wybrano pliku.")
-            file_path = file_info[0]["datapath"]
-            sheet_name = sheet_select()
-            if not sheet_name:
-                raise ValueError("Nie wybrano arkusza.")
+# 🔍 Sprawdzenie liczb
+non_numeric_found = data.iloc[:, 1:].applymap(
+    lambda x: not (pd.isna(x) or isinstance(x, (int, float, np.integer, np.floating)))
+).any().any()
 
-            data = await to_thread(
-                load_excel_data,
-                file_path, sheet_name, start_row, start_col, end_row, end_col
-            )
-
-            if cumulative_option == "Inkrementalne":
-                data.iloc[:, 1:] = data.iloc[:, 1:].cumsum(axis=1)
-
-            if triangle_type == "triangle_paid":
-                user_data.reactive_data_paid_list.set([data])
-                user_data.dev_all_initial.set(None)  # <--- TO DODAJ
-            elif triangle_type == "triangle_incurred":
-                user_data.reactive_data_incurred_list.set([data])
-            elif triangle_type == "triangle_exposure":
-                user_data.reactive_data_exposure_list.set([data])
-
-            hide_spinner()
-            show_info_modal("Dane zostały wczytane.")
-        except Exception as e:
-            hide_spinner()
-            show_info_modal(f"Błąd: {e}", error=True)
+if non_numeric_found:
+    await hide_spinner()
+    show_info_modal("❌ Została wczytana wartość nieliczbowa w danych (poza kolumną AY).", error=True)
+    return
