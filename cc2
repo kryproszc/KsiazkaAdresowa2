@@ -1,2 +1,21 @@
+def update_ratios():
+    user_data.modal_html.set(HTML(""))  # <--- DODAJ TO NA POCZĄTKU
+
+    data_list = user_data.reactive_data_paid_list.get()
+    if not data_list or data_list[-1] is None:
+        user_data.ratio_df_p.set(None)
+        user_data.binary_df_p.set(None)
+        return
+
+def update_ratios_incurred():
+    user_data.modal_html.set(HTML(""))  # <--- tu też
+
+    data = user_data.reactive_data_incurred_list.get()
+    if not data or data[-1] is None:
+        user_data.ratio_df_i.set(None)
+        user_data.binary_df_i.set(None)
+        return
+
+await hide_spinner()
 show_info_modal("✅ Dane zostały poprawnie wczytane.")
-user_data.modal_html.set(HTML(""))  # wyczyść zawartość modala na przyszłość
+user_data.modal_html.set(HTML(""))  # <-- żeby nie wisiał błąd z poprzedniego kroku
