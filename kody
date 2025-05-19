@@ -1,0 +1,20 @@
+import numpy as np
+import scipy.stats as st
+import warnings
+
+# Dane zawierające zero — niedozwolone dla log-normalnego
+x = np.array([1,2,3])
+
+# --- Bez tłumienia ostrzeżeń ---
+try:
+    print("Bez tłumienia ostrzeżeń:")
+    params = st.lognorm.fit(x)
+    print("Dopasowane parametry:", params)
+except Exception as e:
+    print("Błąd:", e)
+
+# --- Z tłumieniem ostrzeżeń ---
+print("\nZ tłumieniem ostrzeżeń:")
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+params = st.lognorm.fit(x)
+print("Dopasowane parametry:", params)
