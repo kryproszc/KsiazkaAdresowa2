@@ -1,11 +1,1 @@
-1. Czy przeprowadzono analizę statystyczną uzasadniającą możliwość łączenia danych z P SA i P Życie SA w przypadku ograniczonej liczby obserwacji (len_dane < 10)? 
-2. Czy rozważano alternatywne rozkłady ogonowe, takie jak Weibull, Burr lub t-Studenta? Na jakiej podstawie dla każdej kategorii dokonano wyboru rozkładu Pareto? Czy decyzja ta została poparta testami dopasowania?
-3. Jaka była przesłanka do przyjęcia progu 10% jako granicy przejścia pomiędzy rozkładem Poissona a Negative Binomial (freq_var <= freq_mean * 1.10)?
-4. Prosimy o uzasadnienie przyjęcia parametrów α = 0.5 oraz λ = 5 × liczba_zdarzeń w estymacji parametrów rozkładu log-normalnego? Czy przeprowadzono analizę wrażliwości tych parametrów względem wpływu na wartość ce_val?
-5. Czy przeprowadzono testy stabilności wyników modelu względem zmian seeda generatora liczb pseudolosowych (RNG)? Jakie są wartości VaR(99.5%) przy różnych ustawieniach seeda i jaki przedział niepewności wynika z tej zmienności?
-6. Prosimy o uzasadnienie przyjęcia parametru par_p = 10% na wyniki modelu? Prosimy  przeprowadzenie analizy wybierając par_p = [30%,50%,70%]?
-7. Prosimy o uzasadnienie wyboru mediany z rozkładu perc_arr? Dodatkowo prosimy o przeprowadzenia analizy wrażliwości dla wyboru kwantyla 0.6 oraz 0.8?
-8. Prosimy o przeprowadzenie debugowania kodu w zakresie liczby obserwacji w kluczowych fragmentach modelu, w szczególności:
-8.1 Dla każdej kategorii ryzyka: jaka liczba obserwacji została zakwalifikowana do ogona (tj. spełniająca warunek dane >= prog)?
-8.2 Dla każdej kategorii: jaka była liczba obserwacji w każdej próbce curr_xi, do której dopasowano rozkład log-normalny?
-9. Prosimy o uzasadnienie przyjętych wartości w lgn_val = st.norm.ppf(0.5 ** 0.05).
+d
