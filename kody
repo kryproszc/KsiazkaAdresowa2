@@ -1,2 +1,5 @@
-npm install react@18.2.0 react-dom@18.2.0
-npm install --save-dev typescript @types/react@18.2.0 @types/react-dom@18.2.0
+npm config set proxy http://twoje-proxy:PORT
+npm config set https-proxy http://twoje-proxy:PORT
+
+
+pnpm install
