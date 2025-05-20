@@ -1,5 +1,2 @@
-npm config set proxy http://twoje-proxy:PORT
-npm config set https-proxy http://twoje-proxy:PORT
-
-
-pnpm install
+npm config get proxy
+npm config get https-proxy
