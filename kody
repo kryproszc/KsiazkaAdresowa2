@@ -1,2 +1,1 @@
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.\venv\Scripts\Activate
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
