@@ -1,1 +1,3 @@
-curl https://registry.npmjs.org/next
+rm -rf .next node_modules
+npm install
+npm run dev
