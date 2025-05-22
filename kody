@@ -1,1 +1,196 @@
-npm install --save-dev @types/node
+import pandas as pd
+import numpy as np
+import openpyxl as oxl
+from metody_jednoroczne import YearHorizont
+import numpy as np
+import matplotlib.pyplot as plt
+
+# from operator import itemgetter
+#wb = oxl.load_workbook(filename='Dane_rzeczywiste\Koncepcja_jednoroczna.xlsx')
+#reserv_data = pd.DataFrame(wb.active.values)
+yh = YearHorizont()
+#reserv_data = reserv_data.iloc[1:, 1:]
+
+# wb = oxl.load_workbook(filename='weights.xlsx')
+# weights = pd.DataFrame(wb.active.values)
+# weights = weights.iloc[1:, 1:]
+
+xl_weights = pd.ExcelFile('Dane_rzeczywiste\All_weights.xlsx')
+weights = xl_weights.parse("MTPL_F")
+weights = weights.iloc[:, 1:]
+
+xl = pd.ExcelFile('Dane_rzeczywiste\!!!!!TECH_EH_11_PL_Calibration_input_ERGO_Hestia_RunOff_20221231_input.xlsx')
+df_triangles = xl.parse("Triangle_paid_gross")
+triangle_analysis = yh.show_triangle_for_libes(df_triangles, 'MTPL_F')
+reserv_dat = triangle_analysis.replace(0, np.nan)
+###inflacja
+xl = pd.ExcelFile(
+    'Dane_rzeczywiste\Parametryzacja_modelu\!!!!!TECH_EH_11_PL_Calibration_input_ERGO_Hestia_RunOff_20221231_input.xlsx')
+df_triangles = xl.parse("Run_Off_Inflation")
+inflation = yh.show_exposure_for_lib(df_triangles, "MTPL_F")
+inflation = yh.reverse_list(inflation.to_list())
+incremental_paid = yh.incremental_triangle(reserv_dat)
+past_inf = inflation[:-2]
+future_inf = inflation[-1]
+
+inflation_adjustment = yh.calculate_inflation_adjustment(past_inf,future_inf)
+inc_inf = yh.incrementa_with_inflation(incremental_paid,inflation_adjustment)
+reserv_data = inc_inf.cumsum(axis=1)
+#reserv_data.to_excel("Dane_rzeczywiste\MTPL_I_infl.xlsx")
+# triangle_analysis.to_excel("Dane_rzeczywiste\MTPL_F.xlsx")
+
+# 1. Rezerwy parametryczne
+
+
+import numpy as np
+import pandas as pd
+import multiprocessing as mp
+from tqdm import tqdm
+
+import numpy as np
+import pandas as pd
+import multiprocessing as mp
+from tqdm import tqdm
+
+
+def random_stochastic_parameters(sigma_j, dev, sd, mm, nSimPart, seed):
+    rng = PCG64Generator(seed)  # Ustawienie seeda
+
+    nDev = len(dev)
+    mu_part = np.zeros((nSimPart, nDev))
+    sig_part = np.zeros((nSimPart, nDev))
+
+    for j in range(nDev):
+        mu_part[:, j] = rng.normal(mu=dev[j], sigma=sd[j], size=nSimPart)
+        df = max(1, mm - j -1)
+        chi_list = rng.chi_squared(df, size=nSimPart)
+        sig_part[:, j] = (np.floor(chi_list) * sigma_j[j]) / df
+
+    return mu_part, sig_part
+
+from tqdm import tqdm
+
+
+# Globalne ustawienie seed w każdym procesie
+def init_worker(seed):
+    np.random.seed(seed)
+
+
+# 1. Generator PRNG z seed
+class PCG64Generator:
+    def __init__(self, seed=None):
+        self.rng = np.random.default_rng(seed)
+
+    def random(self, size=1):
+        return self.rng.uniform(size=size)
+
+    def normal(self, mu=0, sigma=1, size=1):
+        return self.rng.normal(loc=mu, scale=sigma, size=size)
+
+    def lognormal(self, mean=0, sigma=1, size=1):
+        return self.rng.lognormal(mean=mean, sigma=sigma, size=size)
+
+    def chi_squared(self, df, size=1):
+        return self.rng.chisquare(df=df, size=size)
+
+
+# 2. Funkcja równoległa
+def process_row(local_index, mu_mat_global, sigma_mat_global, data_paid_global, Ultimate_Param_ResRisk_global, seed):
+    rng = PCG64Generator(seed + local_index)  # Unikalny, ale powtarzalny seed
+
+    m_i = mu_mat_global[local_index, :]
+    sigma_i = sigma_mat_global[local_index, :]
+    data_paid_copy = np.copy(data_paid_global)
+
+    mm, n_cols = data_paid_copy.shape
+    n_dev = len(m_i)
+
+    if n_cols < n_dev + 1:
+        extra_cols = (n_dev + 1) - n_cols
+        data_paid_copy = np.hstack((data_paid_copy, np.full((mm, extra_cols), np.nan)))
+
+    for j in range(len(m_i)):
+        max_ind_row = max(1, mm - j)
+        for i in range(max_ind_row - 1, mm):
+            VAR_i_j = sigma_i[j] / data_paid_copy[i, j]
+            lmean = np.log((m_i[j]) ** 2 / np.sqrt((m_i[j]) ** 2 + VAR_i_j))
+            lstdev = np.sqrt(np.log(1 + (VAR_i_j / (m_i[j]) ** 2)))
+            CL_i_j = rng.lognormal(lmean, lstdev, size=1)[0]
+            data_paid_copy[i, j + 1] = data_paid_copy[i, j] * CL_i_j
+
+    u_i = data_paid_copy[:, -1]
+    return np.sum(u_i) - Ultimate_Param_ResRisk_global
+
+
+# 4. Główna funkcja batchowana
+def stochastic_triangle_forward_test_szybki_batched(
+        data_paid, sigma_j, dev, sd,
+        simTotal=300000, Ultimate_Param_ReservingRisk=0,
+        result_file="results_batched.csv",
+        main_seed=202260011, batch_size=10000
+):
+    np.random.seed(main_seed)  # Ustawienie globalnego seed raz na start
+    mm = data_paid.shape[0]
+    nBatches = int(np.ceil(simTotal / batch_size))
+    num_cores = max(2, mp.cpu_count() - 1)
+
+    results = np.zeros(simTotal)
+
+    with mp.Pool(processes=num_cores) as pool, tqdm(total=simTotal, desc="Postęp symulacji") as pbar:
+        sim_done = 0
+
+        for b in range(nBatches):
+            start_b = sim_done
+            end_b = min(sim_done + batch_size, simTotal)
+            current_batch_size = end_b - start_b
+
+            # Przekazujemy SEED dla batcha!
+            mu_part, sigma_part = random_stochastic_parameters(sigma_j, dev, sd, mm, current_batch_size, main_seed + b)
+
+            args = [(i, mu_part, sigma_part, data_paid, Ultimate_Param_ReservingRisk, main_seed + b) for i in range(current_batch_size)]
+            batch_out = pool.starmap(process_row, args)
+            batch_res = np.array(batch_out)
+
+            results[start_b:end_b] = batch_res
+            pd.DataFrame(batch_res).to_csv(result_file, mode='a', header=False, index=False)
+
+            sim_done = end_b
+            pbar.update(current_batch_size)
+
+    print(f"===> Wykonano łącznie {sim_done} symulacji w {nBatches} partiach.")
+    return results
+
+
+if __name__ == "__main__":
+    import numpy as np
+    import pandas as pd
+    import multiprocessing as mp
+
+    # Wczytywanie danych
+    pd.options.display.float_format = '{:12.5e}'.format
+    wb = oxl.load_workbook(filename='Dane_rzeczywiste\wspol_MTPL_F.xlsx')
+    wsp = pd.DataFrame(wb.active.values)
+    # pd.set_option("display.precision", 20)
+    dev, sigma_j = wsp.iloc[1, :], wsp.iloc[2, :]
+    sd_proj = [np.sqrt(x) for x in wsp.iloc[3, :].to_list()]
+    # Uruchamianie symulacji
+    result = stochastic_triangle_forward_test_szybki_batched(
+        data_paid=reserv_data,
+        sigma_j=sigma_j,
+        dev=dev,
+        sd=sd_proj,
+        simTotal=30000,
+        Ultimate_Param_ReservingRisk=0,
+        result_file="results_batched.csv",
+        main_seed=202260011,
+        batch_size=1000
+    )
+
+    # Analiza wyników
+    results_cale = 1.1392 * (result - 4232149669.5967)
+    print("Median:", np.median(results_cale))
+    for q in [0.995, 0.996, 0.997, 0.998, 0.999]:
+        quant_val = np.quantile(results_cale, q)
+        print(f"Quantile {q}: {quant_val}")
+    print("Mean:", np.mean(results_cale))
+    print("Difference (Quantile - Mean):", np.quantile(results_cale, 0.995) - np.mean(results_cale))
