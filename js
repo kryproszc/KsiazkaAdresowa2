@@ -2,13 +2,17 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const mutation = useMutation({
   mutationFn: async () => {
-    const res = await fetch(`${API_URL}/calc/wspolczynniki_boot`, {
+    const res = await fetch(`${API_URL}/calc/mult_stoch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: userId,
-        wagi_boot: selectedCells,
+        paid_weights: selectedCells,
         paid_data: sheetJSON,
+        cl_data: [],
+        cl_weights: [],
+        triangle_raw: sheetJSON,
+        cl_weights_raw: selectedCells,
       }),
     });
 
@@ -16,7 +20,10 @@ const mutation = useMutation({
     return res.json();
   },
   onSuccess: (data) => {
-    console.log('✅ BootParam OK', data);
+    console.log('✅ MultStoch OK', data);
+    if (data.train_devide) {
+      setTrainDevide(data.train_devide);
+    }
   },
-  onError: (err) => console.error('❌ BootParam error:', err),
+  onError: (err) => console.error('❌ MultStoch error:', err),
 });
