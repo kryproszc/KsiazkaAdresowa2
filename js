@@ -1,6 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
-const res = await fetch(`${API_URL}/calc/full`, { ... });
-const res = await fetch(`${API_URL}/calc/quantiles`, { ... });
-
+$env:http_proxy = "http://192.168.105.6:3128"
+$env:https_proxy = "http://192.168.105.6:3128"
 npm run build
 npm run start
